@@ -1,0 +1,18 @@
+#!/bin/sh
+
+php="D:/appweb/xampp/php/php.exe"
+proclame="D:/Git/ProclamerManifestGenerator/proclame.php"
+
+echo "executing pre-commit"
+path=$(git rev-parse --show-toplevel)
+$php $proclame $path 
+output=$?
+
+echo $output
+
+if (test $output -eq 0)
+	then
+	git stage manifest.appcache #todo : read config file to extract manifest name
+fi
+
+exit $output

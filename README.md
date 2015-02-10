@@ -116,7 +116,7 @@ You'll want to cutomize the `manifest.appcache` filename. It's up to you !
 
 The `manifest` parameter in `appacache.json` allows you to customize the name of the generated file 
 
-    "manifest":"iamcharlie.appcache" => change the manifest name to iamcharlie
+    "manifest":"iamcharlie.appcache" => change the manifest name to iamcharlie.appcache
 
 Issues
 ------
