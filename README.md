@@ -100,7 +100,7 @@ By default `proclame` will add a wildcard as default value for the `NETWORK` sec
 
 
 Configuring the FALLBACK section
-------------------------------
+--------------------------------
 
 You'll want to tell the browser to load specific resources if some paths are not accessible using the `FALLBACK` section
 
@@ -108,6 +108,15 @@ The `fallback` group in `appacache.json` allows you to add those specific paths 
 
     "fallback":[{"url":"/","fb":"fallback.html"}] => Load fallback.html if the website is inaccessible
 
+
+Changing the manifest filename
+------------------------------
+
+You'll want to cutomize the `manifest.appcache` filename. It's up to you !
+
+The `manifest` parameter in `appacache.json` allows you to customize the name of the generated file 
+
+    "manifest":"iamcharlie.appcache" => change the manifest name to iamcharlie
 
 Issues
 ------

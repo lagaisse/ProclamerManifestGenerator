@@ -12,5 +12,7 @@
 				"*.map"],
 	"include":["/"],
 	"network":["/api"],
+	"fallback":[{"url":"/","fb":"fallback.html"},
+				{"url":"/api","fb":"api.json"}],
 	"manifest":"manifest.appcache"
 }

@@ -148,8 +148,14 @@ $i++;
 //getting the files from the filtered directory iterator
 $cachelist[] = "\n# Cache list";
 foreach($filter[$i] as $entry) {
-    if (!$entry->isDir()) {
-        $cachelist[] = pretify_uri($entry->getPathname(),$projectpath);
+    $cachelist[] = pretify_uri($entry->getPathname(),$projectpath).(($entry->isDir())?"/":"") ;
+}
+
+$include[]="#path to include";
+if (isset($c->include))
+{
+    foreach ($c->include as $ikey => $ivalue) {
+        $include[]=$ivalue;
     }
 }
 
@@ -179,12 +185,12 @@ if (isset($c->network))
 }
 
 //writing everything to file
-$ret=file_put_contents($projectpath.$c->manifest,implode("\n",array_merge($entete,$cachelist,$fallback,$network)));
+$ret=file_put_contents($projectpath.$c->manifest,implode("\n",array_merge($entete,$cachelist,$include,$fallback,$network)));
 if ($ret===false)
 {
     echo "Error while writing the manifest file. exiting...";
     exit(1);
 }
 
-echo "Manifest File has been generated in ". $projectpath.$c->manifest . PHP_EOL;
+echo "Manifest File has been generated to ". $projectpath.$c->manifest . PHP_EOL;
 exit(0);
