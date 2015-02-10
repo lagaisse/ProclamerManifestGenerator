@@ -1,158 +1,160 @@
 <?php
-
-
+# Copyright 2014 Kevin Lagaisse
+# 
+# Licensed under the Creative Commons BY-NC-SA 4.0 licence (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://creativecommons.org/licenses/by-nc-sa/4.0/
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 //helper function
 function pretify_uri($uri,$root) 
 {
-	$aux=$uri;
-	$aux = str_replace($root,'',$aux);
-	$aux = str_replace(DIRECTORY_SEPARATOR,'/',$aux);
-	return $aux;
+    $aux=$uri;
+    $aux = str_replace($root,"",$aux);
+    $aux = str_replace(DIRECTORY_SEPARATOR,"/",$aux);
+    return $aux;
+}
+
+function usage($programName)
+{
+    $usage[]= "\n";
+    $usage[]= "Usage    : php ${programName} PROJECTPATH [CONFPATH]" ;
+    $usage[]= "" ;
+    $usage[]= "Startup :" ;
+    $usage[]= "    PROJECTPATH : your project directory where the website is stored" ;
+    $usage[]= "    CONFPATH    : path to the config file appcache.config, relative to the current directory" ;
+    $usage[]= "                  default : appcache.json in your project path" ;
+    echo implode(PHP_EOL, $usage);
+    exit(1);
 }
 
 
+if ($argc<=1)
+{
+    usage($argv[0]);
+}
 
+if ($argc>=2)
+{
+    $projectpath=$argv[1];
 
+}
 
-/*
-http://stackoverflow.com/questions/13444677/directory-iterator-and-recursive-directory-iterator
+if (false===realpath($projectpath))
+{
+    echo "Projectpath not found. exiting...".PHP_EOL;
+    exit(1);
+}
+$projectpath=realpath($projectpath);
 
-http://stackoverflow.com/questions/14304935/php-listing-all-directories-and-sub-directories-recursively-in-drop-down-menu
+if (!is_dir($projectpath))
+{
+    echo "Projectpath not a dir. exiting...".PHP_EOL;
+    exit(1);
+}
+$projectpath=$projectpath.DIRECTORY_SEPARATOR;
 
-http://www.sitepoint.com/list-files-and-directories-with-php/
-
-https://developer.mozilla.org/fr/docs/Utiliser_Application_Cache
-
-http://stackoverflow.com/questions/406230/regular-expression-to-match-string-not-containing-a-word
-
-
-*/
-//open config file
-
-/*$path_prefix=;
-
-//open manifest file
-$fo_name="manifest.appcache";
-
-$f=fopen(filename, mode);
-
-*/
-
-$config="./config.json";
+if ($argc==3)
+{
+    $config=$argv[2];
+}
+else
+{
+    $config=$projectpath."appcache.json";
+}
 
 
 if (false===realpath($config))
 {
-	echo 'Config file not found. exiting...'.PHP_EOL;
-	exit(1);
+    echo "Config file not found. in ".$config." exiting...".PHP_EOL;
+    exit(1);
 }
 
 $c=json_decode(file_get_contents(realpath($config)));
 
 if ($c==null||$c===false)
 {
-	echo 'Config file : bad json. exiting...'.PHP_EOL;
-	exit(1);
+    echo "Config file : bad json. exiting...".PHP_EOL;
+    exit(1);
 }
 
-if (!isset($c->projectpath))
-{
-	echo 'Projectpath not set. exiting...'.PHP_EOL;
-	exit(1);
-}
 
-if (false===realpath($c->projectpath))
-{
-	echo 'Projectpath not found. exiting...'.PHP_EOL;
-	exit(1);
-}
-$c->projectpath=realpath($c->projectpath);
-
-if (!is_dir($c->projectpath))
-{
-	echo 'Projectpath not a dir. exiting...'.PHP_EOL;
-	exit(1);
-}
-$c->projectpath=$c->projectpath.DIRECTORY_SEPARATOR;
 
 if (!isset($c->exclude))
 {
-	echo 'No file exclusion'.PHP_EOL;
+    echo "No file exclusion".PHP_EOL;
 }
 
 if (!isset($c->include))
 {
-	echo 'No additional url to include'.PHP_EOL;
+    echo "No additional url to include".PHP_EOL;
 }
 
 if (!isset($c->network))
 {
-	echo 'No network resource to add'.PHP_EOL;
+    echo "No network resource to add".PHP_EOL;
+    $c->network[] = "*";
 }
 
 if (!isset($c->fallback))
 {
-	echo 'No fallback to add'.PHP_EOL;
+    echo "No fallback to add".PHP_EOL;
 }
 
 if (!isset($c->manifest))
 {
-	echo 'No manifest file. Using default : manifest.appcache'.PHP_EOL;
-	$c->manifest="manifest.appcache";
-	$c->exclude[]=$c->manifest;
+    echo "No manifest file. Using default : manifest.appcache".PHP_EOL;
+    $c->manifest="manifest.appcache";
 }
-
-
-
-//exit(0);
-
-print_r($c->exclude);
-
+    $c->exclude[]=$c->manifest;
+    $c->exclude[]=$config;
 
 //Listing all files in the project directory
-$directory = new RecursiveDirectoryIterator($c->projectpath, RecursiveDirectoryIterator::SKIP_DOTS);
+$directory = new RecursiveDirectoryIterator($projectpath, RecursiveDirectoryIterator::SKIP_DOTS);
 
 $flattened = new RecursiveIteratorIterator($directory,
     RecursiveIteratorIterator::SELF_FIRST,
     RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
-	);
+    );
 
 $i = 0;
 $filter = array();
 $filter[$i] = $flattened;
 
 /*******************************************\
-	Managing the cache section by filtering 
-	the the files using the exclusion part 
-	of the config file
+    Managing the cache section by filtering 
+    the the files using the exclusion part 
+    of the config file
 \*******************************************/
 foreach ($c->exclude as $ckey => $cvalue) {
-	if(substr($cvalue, -1) == '/') { //we have a directory
-    	$cvalue = substr($cvalue, 0, -1);
-    	$cvalue = $c->projectpath.$cvalue;
-	}
-	$cvalue = str_replace('/',DIRECTORY_SEPARATOR,$cvalue);
-	$cvalue = preg_quote($cvalue);
-	$cvalue = str_replace('\*','.+',$cvalue);
-	echo $cvalue . PHP_EOL;
-	$filter[$i+1] = new RegexIterator($filter[$i],  '#^((?!'.$cvalue.').)+$#sDi');
-	$i++;
+if(substr($cvalue, -1) == "/") { //we have a directory
+    $cvalue = substr($cvalue, 0, -1);
+    $cvalue = $projectpath.$cvalue;
 }
-echo "-".$i."-".PHP_EOL;
-//exit(1);
+$cvalue = str_replace("/",DIRECTORY_SEPARATOR,$cvalue);
+$cvalue = preg_quote($cvalue);
+$cvalue = str_replace("\*",".+",$cvalue);
+$filter[$i+1] = new RegexIterator($filter[$i],  "#^((?!".$cvalue.").)+$#sDi");
+$i++;
+}
+
 //getting the files from the filtered directory iterator
 $cachelist[] = "\n# Cache list";
 foreach($filter[$i] as $entry) {
-	if (!$entry->isDir()) {
-    	$cachelist[] = pretify_uri($entry->getPathname(),$c->projectpath);
-	}
+    if (!$entry->isDir()) {
+        $cachelist[] = pretify_uri($entry->getPathname(),$projectpath);
+    }
 }
-print_r($cachelist);
-
 
 /*******************************************\
-	Writing the appcache file
+    Writing the appcache file
 \*******************************************/
 $entete[]="CACHE MANIFEST";
 $entete[]="# DO NOT EDIT : generated by proclame.php";
@@ -161,23 +163,28 @@ $entete[]="# ".gmdate("Y-m-d")." at ".time();
 //cachelist done before...
 
 $fallback[]="\nFALLBACK:";
-foreach (((array)$c->fallback) as $fkey => $fvalue) {
-	$fallback[]=$fvalue->url ." ".$fvalue->fb;
+if (isset($c->fallback))
+{
+    foreach ($c->fallback as $fkey => $fvalue) {
+        $fallback[]=$fvalue->url ." ".$fvalue->fb;
+    }
 }
 
 $network[]="\nNETWORK:"; //use from network if available
-foreach ($c->network as $nkey => $nvalue) {
-	$network[]=$nvalue;
+if (isset($c->network))
+{
+    foreach ($c->network as $nkey => $nvalue) {
+        $network[]=$nvalue;
+    }
 }
-
 
 //writing everything to file
-
-$ret=file_put_contents($c->projectpath.$c->manifest,implode("\n",array_merge($entete,$cachelist,$fallback,$network)));
+$ret=file_put_contents($projectpath.$c->manifest,implode("\n",array_merge($entete,$cachelist,$fallback,$network)));
 if ($ret===false)
 {
-	echo "Erreur lors de l'écriture du manifest. exiting...";
-	exit(1);
+    echo "Error while writing the manifest file. exiting...";
+    exit(1);
 }
 
+echo "Manifest File has been generated in ". $projectpath.$c->manifest . PHP_EOL;
 exit(0);
