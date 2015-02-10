@@ -1,0 +1,19 @@
+{
+	"projectpath":"d:/www/BrokenStuff/",
+	"exclude":["system/", 
+				"application/",
+				"uploads/", 
+				"sql/", 
+				".git/",
+				"composer.json",
+				"readme.md",
+				"license.txt",
+				".htaccess", 
+				"*.php", 
+				"*.map"],
+	"include":["/"],
+	"network":["/api"],
+	"fallback":{"0":{"url":"/","fb":"fallback.html"},
+				"1":{"url":"/api","fb":"api.json"}},
+	"manifest":"manifest.appcache"
+}
