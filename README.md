@@ -1,0 +1,2 @@
+# ProclamerManifestGenerator
+Appcache Manifest generator
