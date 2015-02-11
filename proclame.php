@@ -29,7 +29,7 @@ function usage($programName)
     $usage[]= "" ;
     $usage[]= "Startup :" ;
     $usage[]= "    PROJECTPATH : your project directory where the website is stored" ;
-    $usage[]= "    CONFPATH    : path to the config file appcache.config, relative to the current directory" ;
+    $usage[]= "    CONFPATH    : path to the config file appcache.json" ;
     $usage[]= "                  default : appcache.json in your project path" ;
     echo implode(PHP_EOL, $usage);
     exit(1);

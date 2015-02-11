@@ -2,17 +2,27 @@
 
 php="D:/appweb/xampp/php/php.exe"
 proclame="D:/Git/ProclamerManifestGenerator/proclame.php"
+path=$(git rev-parse --show-toplevel)
+config=$path/appcache.json
 
 echo "executing pre-commit"
-path=$(git rev-parse --show-toplevel)
-$php $proclame $path 
+
+#executing manifest generation
+$php $proclame $path $config
 output=$?
+output2=0
 
-echo $output
-
-if (test $output -eq 0)
+if test $output -eq 0
 	then
-	git stage manifest.appcache #todo : read config file to extract manifest name
+	manifest=$(sed -nr -e 's/"manifest":([^"]*)(")(.+)(")(,*)/\3/p' "$config")
+	if test -z $manifest
+		then
+		git stage manifest.appcache
+		output2=$?
+	else
+		git stage $manifest
+		output2=$?
+	fi
 fi
-
-exit $output
+echo "pre-commit finished with codes : " $output "-" $output2
+exit $(($output2+$output))
