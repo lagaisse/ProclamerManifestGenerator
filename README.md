@@ -13,6 +13,8 @@ create an appcache.json file containing your configuration in your project path
 
 That's you'll have to do !
 
+Optional : you can place the `pre-commit` file in the `.git/hooks/` directory located in your project path
+
 Usage
 -----
 

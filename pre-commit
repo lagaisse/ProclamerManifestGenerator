@@ -17,12 +17,10 @@ if test $output -eq 0
 	manifest=$(sed -nr -e 's/"manifest":([^"]*)(")(.+)(")(,*)/\3/p' "$config")
 	if test -z $manifest
 		then
-		git stage manifest.appcache
-		output2=$?
-	else
-		git stage $manifest
-		output2=$?
+		manifest="manifest.appcache"
 	fi
+	git stage $manifest
+	output2=$?
 fi
 echo "pre-commit finished with codes : " $output "-" $output2
 exit $(($output2+$output))
