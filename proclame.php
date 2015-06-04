@@ -148,7 +148,9 @@ $i++;
 //getting the files from the filtered directory iterator
 $cachelist[] = "\n# Cache list";
 foreach($filter[$i] as $entry) {
-    $cachelist[] = pretify_uri($entry->getPathname(),$projectpath).(($entry->isDir())?"/":"") ;
+    if (!$entry->isDir()) {
+        $cachelist[] = pretify_uri($entry->getPathname(),$projectpath).(($entry->isDir())?"/":"") ;
+    }
 }
 
 $include[]="#path to include";
