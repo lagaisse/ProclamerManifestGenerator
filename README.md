@@ -95,7 +95,7 @@ The `network` group in `appcache.json` allows you to add those specific paths in
 
     "network":["/api"] => Load the api from the server
 
-By default `proclame` will add a wildcard as default value for the `NETWORK` section:
+Note that `proclame` will always add a wildcard to the `NETWORK` section:
 
     NETWORK:
     *

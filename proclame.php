@@ -14,16 +14,14 @@
 # limitations under the License.
 
 //helper function
-function pretify_uri($uri,$root) 
-{
+function pretify_uri($uri,$root) {
     $aux=$uri;
     $aux = str_replace($root,"",$aux);
     $aux = str_replace(DIRECTORY_SEPARATOR,"/",$aux);
     return $aux;
 }
 
-function usage($programName)
-{
+function usage($programName) {
     $usage[]= "\n";
     $usage[]= "Usage    : php ${programName} PROJECTPATH [CONFPATH]" ;
     $usage[]= "" ;
@@ -36,80 +34,67 @@ function usage($programName)
 }
 
 
-if ($argc<=1)
-{
+if ($argc<=1) {
     usage($argv[0]);
 }
 
-if ($argc>=2)
-{
+if ($argc>=2) {
     $projectpath=$argv[1];
 
 }
 
-if (false===realpath($projectpath))
-{
+if (false===realpath($projectpath)) {
     echo "Projectpath not found. exiting...".PHP_EOL;
     exit(1);
 }
 $projectpath=realpath($projectpath);
 
-if (!is_dir($projectpath))
-{
+if (!is_dir($projectpath)) {
     echo "Projectpath not a dir. exiting...".PHP_EOL;
     exit(1);
 }
 $projectpath=$projectpath.DIRECTORY_SEPARATOR;
 
-if ($argc==3)
-{
+if ($argc==3) {
     $config=$argv[2];
 }
-else
-{
+else {
     $config=$projectpath."appcache.json";
 }
 
 
-if (false===realpath($config))
-{
+if (false===realpath($config)) {
     echo "Config file not found. in ".$config." exiting...".PHP_EOL;
     exit(1);
 }
 
 $c=json_decode(file_get_contents(realpath($config)));
 
-if ($c==null||$c===false)
-{
+if ($c==null||$c===false) {
     echo "Config file : bad json. exiting...".PHP_EOL;
     exit(1);
 }
 
 
 
-if (!isset($c->exclude))
-{
+if (!isset($c->exclude)) {
     echo "No file exclusion".PHP_EOL;
 }
 
-if (!isset($c->include))
-{
+if (!isset($c->include)) {
     echo "No additional url to include".PHP_EOL;
 }
 
-if (!isset($c->network))
-{
-    echo "No network resource to add".PHP_EOL;
+if (!isset($c->network)|| in_array("*",$c->network)) {
+    echo "No * in network resources".PHP_EOL;
     $c->network[] = "*";
 }
 
-if (!isset($c->fallback))
-{
+if (!isset($c->fallback)) {
     echo "No fallback to add".PHP_EOL;
 }
 
-if (!isset($c->manifest))
-{
+if (!isset($c->manifest)) {
     echo "No manifest file. Using default : manifest.appcache".PHP_EOL;
     $c->manifest="manifest.appcache";
 }
@@ -154,8 +139,7 @@ foreach($filter[$i] as $entry) {
 }
 
 $include[]="#path to include";
-if (isset($c->include))
-{
+if (isset($c->include)) {
     foreach ($c->include as $ikey => $ivalue) {
         $include[]=$ivalue;
     }
@@ -171,16 +155,14 @@ $entete[]="# ".gmdate("Y-m-d")." at ".time();
 //cachelist done before...
 
 $fallback[]="\nFALLBACK:";
-if (isset($c->fallback))
-{
+if (isset($c->fallback)) {
     foreach ($c->fallback as $fkey => $fvalue) {
         $fallback[]=$fvalue->url ." ".$fvalue->fb;
     }
 }
 
 $network[]="\nNETWORK:"; //use from network if available
-if (isset($c->network))
-{
+if (isset($c->network)) {
     foreach ($c->network as $nkey => $nvalue) {
         $network[]=$nvalue;
     }
@@ -188,8 +170,7 @@ if (isset($c->network))
 
 //writing everything to file
 $ret=file_put_contents($projectpath.$c->manifest,implode("\n",array_merge($entete,$cachelist,$include,$fallback,$network)));
-if ($ret===false)
-{
+if ($ret===false) {
     echo "Error while writing the manifest file. exiting...";
     exit(1);
 }
