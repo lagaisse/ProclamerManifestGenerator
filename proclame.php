@@ -85,7 +85,7 @@ if (!isset($c->include)) {
     echo "No additional url to include".PHP_EOL;
 }
 
-if (!isset($c->network)|| in_array("*",$c->network)) {
+if (!isset($c->network) || !in_array("*",$c->network)) {
     echo "No * in network resources".PHP_EOL;
     $c->network[] = "*";
 }
